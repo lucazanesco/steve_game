@@ -36,6 +36,11 @@ looser_scaling = pygame.transform.scale(looser, (WIDTH // 2, 300))
 looser_height = looser_scaling.get_height()
 looser_width = looser_scaling.get_width()
 
+winner = pygame.image.load("images/winner.jpg").convert_alpha()
+winner_scaling = pygame.transform.scale(winner, (WIDTH // 2, 300))
+winner_height = winner_scaling.get_height()
+winner_width = winner_scaling.get_width()
+
 
 while running:
     # poll for events
@@ -59,6 +64,8 @@ while running:
             if event.type == pygame.QUIT:
                 bounce_zero = False
                 running = False
+        number_blocks = len(blocks)
+        print(f"Number of blocks: {number_blocks}\n")
         screen.fill("purple")
         screen.blit(title_scaling, ((WIDTH - title_width) // 2, 20))
         ball = ball.move([0, 1])
@@ -164,6 +171,49 @@ while running:
                 points = 0
             break
     draw_points(screen, score_popups, points_font)
+
+
+    print(f"Number of deleted blocks: {len(deleted_blocks)}")
+    if number_blocks == len(deleted_blocks):
+        while waiting:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    waiting = False
+                    running = False
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_RETURN]:
+                waiting = False
+                running = False
+            if keys[pygame.K_a]:
+                waiting = False
+                ball = pygame.draw.circle(
+                    screen, "red", player_pos, 20
+                    ) 
+                bounce_zero = True
+                speed = [4, 4]
+                deleted_blocks = []
+                bar.topleft = ((WIDTH - bar_width) // 2, HEIGHT - 130)
+            # ball.move([0, 1])
+            screen.fill("black")
+            screen.blit(
+                winner_scaling,
+                ((WIDTH - winner_width) // 2, (HEIGHT - winner_height) // 2),
+            )
+            text_surface = my_font.render(
+                "Press A for a new game.\nPress RETURN to quit the game.",
+                False,
+                "white",
+            )
+            width_my_font, height_my_font = my_font.size("Press RETURN to quit the game.")
+            screen.blit(
+                text_surface,
+                ((WIDTH - width_my_font) // 2, 800),
+                )
+            pygame.display.flip()
+            clock.tick(60)
+        waiting = True
+        continue
+
 
     # flip() the display to put your work on screen
     pygame.display.flip()
