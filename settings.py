@@ -10,3 +10,6 @@ block_height = 30
 # bar
 bar_width = 100
 bar_height = 10
+
+# scores pop up 
+score_popups = [] # each element: {"pos": [x,y], "value": int, "timer": int}

@@ -1,8 +1,8 @@
 # Example file showing a circle moving on screen
 import pygame
-from settings import WIDTH, HEIGHT, bar_width, bar_height, block_width, block_height
+from settings import WIDTH, HEIGHT, bar_width, bar_height, block_width, block_height, score_popups
 
-from blocks import draw_blocks
+from blocks import draw_blocks, draw_points
 
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -24,6 +24,7 @@ bounce_zero = True
 
 pygame.font.init()
 my_font = pygame.font.SysFont("Comic Sans MS", 20)
+points_font = pygame.font.SysFont("Comic Sans MS", 30, True)
 
 title = pygame.image.load("images/pygame_logo.png").convert_alpha()
 title_scaling = pygame.transform.scale(title, (WIDTH - 10, 100))
@@ -49,6 +50,9 @@ while running:
 
     # game title
     screen.blit(title_scaling, ((WIDTH - title_width) // 2, 20))
+
+    # points counter
+    points = 0
 
     while bounce_zero:
         for event in pygame.event.get():
@@ -96,7 +100,7 @@ while running:
                 waiting = False
                 ball = pygame.draw.circle(
                     screen, "red", player_pos, 20
-                )  # resetta la posizione VERA della pallina
+                ) 
                 bounce_zero = True
                 speed = [4, 4]
                 deleted_blocks = []
@@ -141,15 +145,25 @@ while running:
             print(f"Block hitted: {block.left}, {block.top}")
             if color == (0, 0, 255):
                 deleted_blocks.append((block.left, block.top))
-                if block.left + block_width < WIDTH:
+                points += 1
+                if block.left + block_width < WIDTH and (block.left + block_width, block.top) not in deleted_blocks:
                     deleted_blocks.append((block.left + block_width, block.top))
-                if block.left != 5:
+                    points += 1
+                if block.left != 5 and (block.left - block_width, block.top) not in deleted_blocks:
                     deleted_blocks.append((block.left - block_width, block.top))
-                if block.top != 150:
+                    points += 1
+                if block.top != 150 and (block.left, block.top - block_height) not in deleted_blocks:
                     deleted_blocks.append((block.left, block.top - block_height))
+                    points += 1
+                score_popups.append({"pos": [block.centerx, block.centery], "value": points, "timer": 90})
+                points = 0
             else:
                 deleted_blocks.append((block.left, block.top))
+                points += 1
+                score_popups.append({"pos": [block.centerx, block.centery], "value": points, "timer": 90})
+                points = 0
             break
+    draw_points(screen, score_popups, points_font)
 
     # flip() the display to put your work on screen
     pygame.display.flip()

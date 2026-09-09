@@ -1,5 +1,22 @@
 import pygame
-from settings import WIDTH, HEIGHT, block_width, block_height
+from settings import WIDTH, HEIGHT, block_width, block_height, score_popups
+
+
+def draw_points(screen, score_popups, font):
+    for popup in score_popups:
+        text_surface = font.render(
+            f"+{popup['value']}",
+            True,
+            "green",
+        )
+        screen.blit(
+            text_surface,
+            (popup["pos"]),
+        )
+        popup["pos"][1] -= 1
+        popup["timer"] -= 1
+        if popup["timer"] <= 0:
+            score_popups.remove(popup)
 
 
 def draw_blocks(screen, deleted_blocks):
