@@ -1,8 +1,8 @@
 # Example file showing a circle moving on screen
 import pygame
-from settings import WIDTH, HEIGHT, bar_width, bar_height, block_width, block_height, score_popups
+from settings import WIDTH, HEIGHT, bar_width, bar_height, block_width, block_height, score_popups, GRID_START_X, GRID_START_Y
 
-from blocks import draw_blocks, draw_points
+from functions import draw_blocks, draw_points, end_or_restart
 
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -58,7 +58,6 @@ while running:
     # points counter
     points = 0
 
-
     while bounce_zero:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -93,44 +92,19 @@ while running:
             ball.bottom = bar.top
         else:
             ball.top = bar.bottom
-    if ball.bottom >= HEIGHT:
-        while waiting:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    waiting = False
-                    running = False
-            keys = pygame.key.get_pressed()
-            if keys[pygame.K_RETURN]:
-                waiting = False
-                running = False
-            if keys[pygame.K_a]:
-                waiting = False
-                ball = pygame.draw.circle(
-                    screen, "red", player_pos, 20
-                ) 
-                bounce_zero = True
-                speed = [4, 4]
-                deleted_blocks = []
-                bar.topleft = ((WIDTH - bar_width) // 2, HEIGHT - 130)
-                # ball.move([0, 1])
-            screen.fill("black")
-            screen.blit(
-                looser_scaling,
-                ((WIDTH - looser_width) // 2, (HEIGHT - looser_height) // 2),
-            )
-            text_surface = my_font.render(
-                "Press A for a new game.\nPress RETURN to quit the game.",
-                False,
-                "white",
-            )
-            width_my_font, height_my_font = my_font.size("Press RETURN to quit the game.")
-            screen.blit(
-                text_surface,
-                ((WIDTH - width_my_font) // 2, 800),
-            )
-            pygame.display.flip()
-            clock.tick(60)
-        waiting = True
+
+    if ball.bottom >= HEIGHT or number_blocks == len(deleted_blocks):
+        image = winner_scaling if number_blocks == len(deleted_blocks) else looser_scaling
+        image_pos = ((WIDTH - winner_width) // 2, (HEIGHT - winner_height) // 2) if number_blocks == len(deleted_blocks) else ((WIDTH - looser_width) // 2, (HEIGHT - looser_height) // 2)
+        restart, quit = end_or_restart(screen, my_font, image, image_pos, clock)
+        if restart:
+            ball = pygame.draw.circle(screen, "red", player_pos, 20)
+            bounce_zero = True
+            speed = [4, 4]
+            deleted_blocks = []
+            bar.topleft = ((WIDTH - bar_width) // 2, HEIGHT - 130)
+        if quit:
+            running = False
         continue
 
     ball = ball.move(speed)
@@ -156,14 +130,13 @@ while running:
                 if block.left + block_width < WIDTH and (block.left + block_width, block.top) not in deleted_blocks:
                     deleted_blocks.append((block.left + block_width, block.top))
                     points += 1
-                if block.left != 5 and (block.left - block_width, block.top) not in deleted_blocks:
+                if block.left != GRID_START_X and (block.left - block_width, block.top) not in deleted_blocks:
                     deleted_blocks.append((block.left - block_width, block.top))
                     points += 1
-                if block.top != 180 and (block.left, block.top - block_height) not in deleted_blocks:
+                if block.top != GRID_START_Y and (block.left, block.top - block_height) not in deleted_blocks:
                     deleted_blocks.append((block.left, block.top - block_height))
                     points += 1
                 score_popups.append({"pos": [block.centerx, block.centery], "value": points, "timer": 90})
-                print(f"Total points: {total_points}")
                 points = 0
             else:
                 deleted_blocks.append((block.left, block.top))
@@ -172,51 +145,7 @@ while running:
                 points = 0
             break
     draw_points(screen, score_popups, points_font)
-
-
-    print(f"Number of deleted blocks: {len(deleted_blocks)}")
-    print(f"Number of blocks: {number_blocks}")
-    if number_blocks == len(deleted_blocks):
-        while waiting:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    waiting = False
-                    running = False
-            keys = pygame.key.get_pressed()
-            if keys[pygame.K_RETURN]:
-                waiting = False
-                running = False
-            if keys[pygame.K_a]:
-                waiting = False
-                ball = pygame.draw.circle(
-                    screen, "red", player_pos, 20
-                    ) 
-                bounce_zero = True
-                speed = [4, 4]
-                deleted_blocks = []
-                bar.topleft = ((WIDTH - bar_width) // 2, HEIGHT - 130)
-            # ball.move([0, 1])
-            screen.fill("black")
-            screen.blit(
-                winner_scaling,
-                ((WIDTH - winner_width) // 2, (HEIGHT - winner_height) // 2),
-            )
-            text_surface = my_font.render(
-                "Press A for a new game.\nPress RETURN to quit the game.",
-                False,
-                "white",
-            )
-            width_my_font, height_my_font = my_font.size("Press RETURN to quit the game.")
-            screen.blit(
-                text_surface,
-                ((WIDTH - width_my_font) // 2, 800),
-                )
-            pygame.display.flip()
-            clock.tick(60)
-        waiting = True
-        continue
-
-
+        
     # flip() the display to put your work on screen
     pygame.display.flip()
 
