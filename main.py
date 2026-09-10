@@ -41,7 +41,6 @@ winner_scaling = pygame.transform.scale(winner, (WIDTH // 2, 300))
 winner_height = winner_scaling.get_height()
 winner_width = winner_scaling.get_width()
 
-
 while running:
     # poll for events
     # pygame.QUIT event means the user clicked X to close your window
@@ -58,6 +57,7 @@ while running:
 
     # points counter
     points = 0
+
 
     while bounce_zero:
         for event in pygame.event.get():
@@ -159,10 +159,11 @@ while running:
                 if block.left != 5 and (block.left - block_width, block.top) not in deleted_blocks:
                     deleted_blocks.append((block.left - block_width, block.top))
                     points += 1
-                if block.top != 150 and (block.left, block.top - block_height) not in deleted_blocks:
+                if block.top != 180 and (block.left, block.top - block_height) not in deleted_blocks:
                     deleted_blocks.append((block.left, block.top - block_height))
                     points += 1
                 score_popups.append({"pos": [block.centerx, block.centery], "value": points, "timer": 90})
+                print(f"Total points: {total_points}")
                 points = 0
             else:
                 deleted_blocks.append((block.left, block.top))
@@ -174,6 +175,7 @@ while running:
 
 
     print(f"Number of deleted blocks: {len(deleted_blocks)}")
+    print(f"Number of blocks: {number_blocks}")
     if number_blocks == len(deleted_blocks):
         while waiting:
             for event in pygame.event.get():
